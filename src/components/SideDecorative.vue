@@ -1,38 +1,56 @@
 <template>
-  <div class="w-64 min-h-full">
-    <!-- Encabezado -->
-    <h2 class="text-lg font-bold mb-1">Proyectos</h2>
-    <p class="text-sm text-gray-400 mb-4">No hay proyectos</p>
-
-    <!-- Menú -->
-    <ul class="menu bg-base-300 rounded-box w-full">
-      <li><a>Item 1</a></li>
-
-      <li>
-        <details>
-          <summary>Parent</summary>
-          <ul>
-            <li><a>Submenu 1</a></li>
-            <li><a>Submenu 2</a></li>
-
-            <li>
-              <details>
-                <summary>Parent</summary>
-                <ul>
-                  <li><a>Submenu 1</a></li>
-                  <li><a>Submenu 2</a></li>
-                </ul>
-              </details>
+  <aside class="w-64 min-h-screen bg-base-300 p-4">
+    <h2 class="text-lg font-bold mb-2">Proyectos</h2>
+    <ul class="menu bg-base-100 rounded-box w-full">
+      <li v-for="p in projects" :key="p.id">
+        <details
+          :open="openList.includes(p.id)"
+          @toggle="handleToggle(p.id, $event)"
+        >
+          <summary>{{ p.name }}</summary>
+          <ul class="pl-4 mt-2 space-y-1">
+            <li v-for="t in p.tasks" :key="t.id" class="flex items-center">
+              <input
+                type="checkbox"
+                class="checkbox checkbox-sm mr-2"
+                :checked="t.completed"
+                @change.stop="toggleTask(p.id, t.id)"
+              />
+              <span :class="{ 'line-through text-gray-500': t.completed }">
+                {{ t.name }}
+              </span>
             </li>
           </ul>
         </details>
       </li>
-
-      <li><a>Item 3</a></li>
     </ul>
-  </div>
+  </aside>
 </template>
 
 <script setup lang="ts">
-// Sin lógica JS, todo es HTML/CSS nativo con Daisy
+import { ref } from 'vue'
+import { useProjectsStore } from '@/stores/projects'
+
+const store = useProjectsStore()
+const projects = store.projects
+const openList = ref<number[]>([])
+
+function toggleTask(pid: number, tid: number) {
+  store.toggleTask(pid, tid)
+}
+
+function handleToggle(id: number, event: Event) {
+  const el = event.target as HTMLDetailsElement
+
+  if (el.open) {
+
+    if (!openList.value.includes(id)) {
+      openList.value.push(id)
+    }
+    store.selectProject(id)
+  } else {
+    openList.value = openList.value.filter(x => x !== id)
+    store.selectProject(null as any)
+  }
+}
 </script>
