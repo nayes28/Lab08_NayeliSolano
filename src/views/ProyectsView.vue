@@ -1,7 +1,7 @@
 <template>
   <LayoutDecorative>
     <div class="p-6 relative">
-      <!-- Tabla -->
+      <!-- Tabla de proyectos -->
       <div class="overflow-x-auto">
         <table class="table w-full">
           <thead>
@@ -23,44 +23,63 @@
         </table>
       </div>
 
-      <!-- Botón flotante con ubicación controlada aquí -->
+      <!-- Botón flotante que abre el modal -->
       <FloatingButton
-        :buttonClass="'btn btn-accent btn-circle fixed bottom-10 right-10 shadow-lg z-50'"
-        @click="openModal"
+        :buttonClass="'btn btn-accent btn-circle fixed bottom-6 right-6 shadow-lg z-50'"
+        @click="modalRef?.open()"
       />
 
-      <!-- Modal de DaisyUI -->
-      <dialog id="project_modal" class="modal">
-        <div class="modal-box">
+      <!-- Modal reutilizable con slots -->
+      <ProjectModal ref="modalRef">
+        <template #title>
           <h3 class="text-lg font-bold">Nuevo Proyecto</h3>
-          <form method="dialog" class="space-y-3 mt-4">
-            <input type="text" placeholder="Nombre del proyecto" class="input input-bordered w-full" />
-            <input type="number" placeholder="Tareas" class="input input-bordered w-full" />
-            <input type="text" placeholder="Avance (%)" class="input input-bordered w-full" />
+        </template>
 
-            <div class="modal-action">
-              <button class="btn">Cancelar</button>
-              <button class="btn btn-primary">Guardar</button>
-            </div>
+        <template #default>
+          <input v-model="nuevo.nombre" type="text" placeholder="Nombre del proyecto" class="input input-bordered w-full mb-3" />
+          <input v-model="nuevo.tareas" type="number" placeholder="Tareas" class="input input-bordered w-full mb-3" />
+          <input v-model="nuevo.avance" type="text" placeholder="Avance (%)" class="input input-bordered w-full" />
+        </template>
+
+        <template #footer>
+          <form method="dialog" class="flex gap-2">
+            <button class="btn">Cancelar</button>
+            <button class="btn btn-primary" @click.prevent="guardarProyecto">Guardar</button>
           </form>
-        </div>
-      </dialog>
+        </template>
+      </ProjectModal>
     </div>
   </LayoutDecorative>
 </template>
 
 <script setup lang="ts">
+import { ref } from 'vue'
 import LayoutDecorative from '@/components/LayoutDecorative.vue'
 import FloatingButton from '@/components/FloatingButton.vue'
-import { ref } from 'vue'
+import ProjectModal from '@/components/ProjectModal.vue'
+
+const modalRef = ref<InstanceType<typeof ProjectModal> | null>(null)
 
 const projects = ref([
   { id: 1, name: 'Proyecto A', tasks: 10, progress: '50%' },
   { id: 2, name: 'Proyecto B', tasks: 5, progress: '80%' }
 ])
 
-function openModal() {
-  const modal = document.getElementById('project_modal') as HTMLDialogElement
-  if (modal) modal.showModal()
+const nuevo = ref({
+  nombre: '',
+  tareas: 0,
+  avance: ''
+})
+
+function guardarProyecto() {
+  projects.value.push({
+    id: projects.value.length + 1,
+    name: nuevo.value.nombre,
+    tasks: nuevo.value.tareas,
+    progress: nuevo.value.avance
+  })
+
+  // limpiar campos
+  nuevo.value = { nombre: '', tareas: 0, avance: '' }
 }
 </script>

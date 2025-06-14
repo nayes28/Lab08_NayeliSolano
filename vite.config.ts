@@ -7,6 +7,16 @@ import vueDevTools from 'vite-plugin-vue-devtools'
 
 // https://vite.dev/config/
 export default defineConfig({
+
+    // 1) Ajusta la ruta base a tu repo
+  base: '/Lab08_NayeliSolano/',
+
+  // 2) Genera el build dentro de docs/
+  build: {
+    outDir: 'docs',
+    emptyOutDir: true,
+  },
+
   plugins: [
     tailwindcss(),
     vue(),
